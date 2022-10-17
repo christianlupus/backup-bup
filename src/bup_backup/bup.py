@@ -15,8 +15,8 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-from . import config
-from . import cli
-from . import helper
-from . import lvm
-from . import bup
+import subprocess
+
+class Bup:
+    def __init__(self, config):
+        self.config = config
