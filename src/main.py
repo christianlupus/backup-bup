@@ -33,6 +33,20 @@ def main():
     if cli.isShowDebug():
         print('Total configuration', config.__dict__)
     
+    helperMap = {
+        'plain': bup_backup.helper.PlainProcessingHelper(config),
+        'lvm': bup_backup.helper.LVMProcessingHelper(config),
+        'crypt': bup_backup.helper.LVMProcessingHelper(config),
+        'lvm+crypt': bup_backup.helper.LVMCryptProcessingHelper(config)
+    }
+
+    for index in range(0, len(config.table)):
+        helper = helperMap[config.table[index].type]
+        
+        if cli.isVerbose():
+            print(f'Checking entry {index} in table: {config.table[index].source}')
+        helper.checkConfig(index)
+    
 
 if __name__ == '__main__':
     main()

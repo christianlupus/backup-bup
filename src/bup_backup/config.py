@@ -18,13 +18,27 @@
 import os
 import re
 
+class BackupTableRow:
+    def __init__(self, source, branch, target, type, options = []):
+        self.source = source
+        self.branch = branch
+        self.target = target
+        self.type = type
+        self.options = options
+    
+    def __repr__(self):
+        return f"BackupLine({self.source} to {self.branch}:{self.target} as {self.type} with {self.options})"
+
 class BackupConfig:
     def __init__(self):
         self.common = {}
         self.common['bup'] = 'bup'
         self.common['snap_size'] = '1g'
+        self.common['snap_name'] = 'snap-backup'
+        self.common['decrypt_name'] = 'snap-backup-decrypted'
+        self.common['mount_base'] = '/run/bup-backup/mnt'
 
-        self.table = []
+        self.table: list[BackupTableRow] = []
 
 class BackupConfigParser:
     def __init__(self, configPath = '/etc/bup-backup', debug=False):
@@ -101,22 +115,15 @@ class BackupConfigParser:
             else:
                 options = 'none'
             
-            lineOptions = {
-                'source': source,
-                'branch': branch,
-                'target': target,
-                'type': type,
-                'options': options
-            }
+            if target == '-':
+                target = source
 
-            if lineOptions['target'] == '-':
-                lineOptions['target'] = lineOptions['source']
+            options = self.__parseAdditionalOptionsField(options)
 
-            lineOptions['options'] = self.__parseAdditionalOptionsField(lineOptions['options'])
+            lineOptions = BackupTableRow(source, branch, target, type, options)
             
             if self.debug:
-                print('Parsed config table line:')
-                print(lineOptions)
+                print('Parsed config table line:', lineOptions)
             
             config.table.append(lineOptions)
             
