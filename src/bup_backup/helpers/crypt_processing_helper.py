@@ -16,13 +16,12 @@
 """
 
 from .abstract_processing_helper import (
-    MountingProcessingHelper, ConfigurationException
-)
+    AbstractProcessingHelper, ConfigurationException
+    )
 
 import os
-import re
 
-class CryptProcessingHelper(MountingProcessingHelper):
+class CryptProcessingHelper(AbstractProcessingHelper):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -30,11 +29,11 @@ class CryptProcessingHelper(MountingProcessingHelper):
         super().checkConfig(index)
         tableLine = self.config.table[index]
 
-        decryptName = self.getOption(index, 'decrypt_name')
+        decryptName = self.configHelper.getOption(index, 'decrypt_name')
         if os.path.exists(os.path.join('/dev/mapper', decryptName)):
             raise ConfigurationException(f"Could not use {decryptName} as name of the decrypted device for {tableLine.source} as it exists already.")
         
-        keyfile = self.getOption(index, 'key')
+        keyfile = self.configHelper.getOption(index, 'key')
         if not os.path.exists(keyfile):
             raise ConfigurationException(f"No key was given for decryption of {tableLine.source}.")
         if not os.access(keyfile, os.R_OK):

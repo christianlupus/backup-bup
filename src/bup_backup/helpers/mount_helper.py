@@ -15,24 +15,18 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-from .abstract_processing_helper import (
-    AbstractProcessingHelper, ConfigurationException
-)
+import bup_backup
 
-from .lvm_processing_helper import LVMProcessingHelper
-from .crypt_processing_helper import CryptProcessingHelper
+import os
+import re
 
-class LVMCryptProcessingHelper(AbstractProcessingHelper):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.lvmHelper = LVMProcessingHelper(*args, **kwargs)
-        self.cryptoHelper = CryptProcessingHelper(*args, **kwargs)
+class MountHelper:
+    
+    def __init__(self, config: bup_backup.config.BackupConfig):
+        self.config = config
 
-    def checkConfig(self, index: int):
-        super().checkConfig(index)
+    def getMountPoint(self, index):
         tableLine = self.config.table[index]
-
-        self.lvmHelper.checkConfig(index)
-        self.cryptoHelper.checkConfig(index)
-
-        #####################  TODO
+        base = self.getOption(index, 'mount_base')
+        basedPath = os.path.join(base, tableLine.source)
+        return self.getOption(index, 'mount_path', basedPath)

@@ -16,13 +16,12 @@
 """
 
 from .abstract_processing_helper import (
-    MountingProcessingHelper, ConfigurationException
+    AbstractProcessingHelper, ConfigurationException
 )
 
 import os
-import re
 
-class PlainProcessingHelper(MountingProcessingHelper):
+class PlainProcessingHelper(AbstractProcessingHelper):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
     

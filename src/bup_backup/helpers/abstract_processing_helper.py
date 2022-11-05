@@ -17,9 +17,9 @@
 
 # from .config import BackupConfig
 import bup_backup
+from .config_helper import ConfigHelper
 
 import os
-import re
 
 class ConfigurationException(Exception):
     pass
@@ -32,26 +32,7 @@ class AbstractProcessingHelper:
         self.dryRun = dryRun
         self.debug = debug
 
-    def getOption(self, index: int, param: str, fallback = None):
-        return self.config.table[index].options.get(param, self.config.common.get(param, fallback))
-
-    def getParsedSize(self, str):
-        pattern = '([0-9,.]+)([kKmMgGtT]?)'
-        expression = re.compile(pattern)
-        match = expression.fullmatch(str)
-
-        mantis = match.group(1).replace(',', '.')
-        unit = match.group(2)
-
-        number = float(mantis)
-        unitMap = {
-            'k': 1024,
-            'm': 1024*1024,
-            'g': 1024*1024*1024,
-            't': 1024*1024*1024*1024
-        }
-        # print(number, mantis, unit, unitMap[unit.lower()])
-        return number * unitMap[unit.lower()]
+        self.configHelper = ConfigHelper(config)
 
     def __isCommonConfigurationValid(self, index: int):
         # Is the current user root?
@@ -66,13 +47,9 @@ class AbstractProcessingHelper:
         
     def prepare(self, index):
         pass
+    
+    def execute(self, index):
+        raise Exception('Not yet implemented.')
 
     def finish(self, index):
         pass
-
-class MountingProcessingHelper(AbstractProcessingHelper):
-    def getMountPoint(self, index):
-        tableLine = self.config.table[index]
-        base = self.getOption(index, 'mount_base')
-        basedPath = os.path.join(base, tableLine.source)
-        return self.getOption(index, 'mount_path', basedPath)

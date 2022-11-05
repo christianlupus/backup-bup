@@ -16,15 +16,12 @@
 """
 
 from .abstract_processing_helper import (
-    MountingProcessingHelper, ConfigurationException
+    AbstractProcessingHelper, ConfigurationException
 )
 
 import bup_backup
 
-import os
-import re
-
-class LVMProcessingHelper(MountingProcessingHelper):
+class LVMProcessingHelper(AbstractProcessingHelper):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.vg = bup_backup.lvm.Vg()
@@ -35,12 +32,12 @@ class LVMProcessingHelper(MountingProcessingHelper):
         tableLine = self.config.table[index]
 
         vgName = self.lv.getVgName(tableLine.source)
-        snapName = f"/dev/{vgName}/{self.getOption(index, 'snap_name')}"
+        snapName = f"/dev/{vgName}/{self.configHelper.getOption(index, 'snap_name')}"
         if self.vg.hasLv(snapName):
             raise ConfigurationException(f"Cannot create {snapName} as it exists already.")
         
-        snapSizeStr = self.getOption(index, 'snap_size')
-        snapSize = self.getParsedSize(snapSizeStr)
+        snapSizeStr = self.configHelper.getOption(index, 'snap_size')
+        snapSize = self.configHelper.getParsedSize(snapSizeStr)
         # print(f"snapSize ({snapSize}) comapted with free space ({self.vg.getFreeSize(vgName)})")
         # print(self.vg.getPeSize(vgName))
         # print(self.vg.getFreeSizePE(vgName))
