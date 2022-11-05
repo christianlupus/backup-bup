@@ -16,6 +16,8 @@
 """
 
 import bup_backup
+import time
+import math
 
 def main():
     cli = bup_backup.cli.Cli()
@@ -47,6 +49,39 @@ def main():
         if cli.isVerbose():
             print(f'Checking entry {index} in table: {config.table[index].source}')
         helper.checkConfig(index)
+    
+    if cli.isVerbose():
+        print('Finished the checks. Starting backup process.')
+    
+    tic = time.monotonic()
+
+    for index in range(0, len(config.table)):
+        helper = helperMap[config.table[index].type]
+
+        if cli.isVerbose():
+            print(f"Backing up {config.table[index].source} started.")
+        
+        helper.execute(index)
+
+        if cli.isVerbose():
+            print(f"Backup step completed.")
+    
+    toc = time.monotonic()
+
+    if cli.isVerbose():
+        delta = toc - tic
+        tictocMinutes = math.floor(delta / 60)
+        tictocSeconds = delta - tictocMinutes * 60
+        tictocHours = math.floor(tictocMinutes / 60)
+        tictocMinutes = tictocMinutes - 60 * tictocHours
+        
+        tictoc = f"{tictocSeconds:3.1f}s"
+        if tictocMinutes > 0:
+            tictoc = f"{tictocMinutes}min {tictoc}"
+        if tictocHours > 0:
+            tictoc = f"{tictocHours}h {tictoc}"
+        
+        print(f"Finished processing the backups in {tictoc}")
     
 
 if __name__ == '__main__':
