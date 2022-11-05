@@ -15,9 +15,20 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-from . import config
-from . import cli
-from . import lvm
-from . import bup
+from .preprocessing_helper import (
+    MountingProcessingHelper, ConfigurationException
+)
 
-from . import helpers
+import os
+import re
+
+class PlainProcessingHelper(MountingProcessingHelper):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+    
+    def checkConfig(self, index: int):
+        super().checkConfig(index)
+        tableLine = self.config.table[index]
+
+        if not os.path.isdir(tableLine.source):
+            raise ConfigurationException(f"Path {tableLine.source} is no folder.")

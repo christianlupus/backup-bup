@@ -15,9 +15,8 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-from . import config
-from . import cli
-from . import lvm
-from . import bup
-
-from . import helpers
+from .plain_processing_helper import PlainProcessingHelper
+from .command_processing_helper import CommandProcessingHelper
+from .lvm_processing_helper import LVMProcessingHelper
+from .crypt_processing_helper import CryptProcessingHelper
+from .lvm_crypt_processing_helper import LVMCryptProcessingHelper

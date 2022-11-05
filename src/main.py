@@ -34,10 +34,10 @@ def main():
         print('Total configuration', config.__dict__)
     
     helperMap = {
-        'plain': bup_backup.helper.PlainProcessingHelper(config),
-        'lvm': bup_backup.helper.LVMProcessingHelper(config),
-        'crypt': bup_backup.helper.LVMProcessingHelper(config),
-        'lvm+crypt': bup_backup.helper.LVMCryptProcessingHelper(config)
+        'plain': bup_backup.helpers.PlainProcessingHelper(config),
+        'lvm': bup_backup.helpers.LVMProcessingHelper(config),
+        'crypt': bup_backup.helpers.LVMProcessingHelper(config),
+        'lvm+crypt': bup_backup.helpers.LVMCryptProcessingHelper(config)
     }
 
     for index in range(0, len(config.table)):

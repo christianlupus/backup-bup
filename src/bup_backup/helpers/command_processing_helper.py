@@ -15,9 +15,27 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-from . import config
-from . import cli
-from . import lvm
-from . import bup
+from .preprocessing_helper import (
+    PreprocessingHelper, ConfigurationException
+)
 
-from . import helpers
+import os
+import re
+
+class CommandProcessingHelper(PreprocessingHelper):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # self.lvmHelper = LVMProcessingHelper(*args, **kwargs)
+        # self.cryptoHelper = CryptProcessingHelper(*args, **kwargs)
+
+    def checkConfig(self, index: int):
+        # super().checkConfig(index)
+        # tableLine = self.config.table[index]
+
+        # self.lvmHelper.checkConfig(index)
+        # self.cryptoHelper.checkConfig(index)
+
+        #####################  TODO
+        pass
+
+## Create classes to handle LVM/Crypt/LVM+CRYPT classes
