@@ -25,17 +25,12 @@ import re
 class CommandProcessingHelper(AbstractProcessingHelper):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # self.lvmHelper = LVMProcessingHelper(*args, **kwargs)
-        # self.cryptoHelper = CryptProcessingHelper(*args, **kwargs)
 
     def checkConfig(self, index: int):
-        # super().checkConfig(index)
-        # tableLine = self.config.table[index]
+        super().checkConfig(index)
+        tableLine = self.config.table[index]
 
-        # self.lvmHelper.checkConfig(index)
-        # self.cryptoHelper.checkConfig(index)
-
-        #####################  TODO
-        pass
-
-## Create classes to handle LVM/Crypt/LVM+CRYPT classes
+        if not os.path.isfile(tableLine.source):
+            raise ConfigurationException(f"The path {tableLine.source} is no file to be executable.")
+        if not os.access(tableLine.source, os.X_OK):
+            raise ConfigurationException(f"The file {tableLine.source} cannot be executed.")
