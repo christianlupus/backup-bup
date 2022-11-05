@@ -24,7 +24,7 @@ import re
 class ConfigurationException(Exception):
     pass
 
-class PreprocessingHelper:
+class AbstractProcessingHelper:
     def __init__(self, config: bup_backup.config.BackupConfig, verbose=False, dryRun=False, debug=False):
         self.config = config
 
@@ -70,7 +70,7 @@ class PreprocessingHelper:
     def finish(self, index):
         pass
 
-class MountingProcessingHelper(PreprocessingHelper):
+class MountingProcessingHelper(AbstractProcessingHelper):
     def getMountPoint(self, index):
         tableLine = self.config.table[index]
         base = self.getOption(index, 'mount_base')

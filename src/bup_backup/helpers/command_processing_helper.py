@@ -15,14 +15,14 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-from .preprocessing_helper import (
-    PreprocessingHelper, ConfigurationException
+from .abstract_processing_helper import (
+    AbstractProcessingHelper, ConfigurationException
 )
 
 import os
 import re
 
-class CommandProcessingHelper(PreprocessingHelper):
+class CommandProcessingHelper(AbstractProcessingHelper):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # self.lvmHelper = LVMProcessingHelper(*args, **kwargs)

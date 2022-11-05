@@ -15,8 +15,8 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-from .preprocessing_helper import (
-    PreprocessingHelper, ConfigurationException
+from .abstract_processing_helper import (
+    AbstractProcessingHelper, ConfigurationException
 )
 
 from .lvm_processing_helper import LVMProcessingHelper
@@ -25,7 +25,7 @@ from .crypt_processing_helper import CryptProcessingHelper
 import os
 import re
 
-class LVMCryptProcessingHelper(PreprocessingHelper):
+class LVMCryptProcessingHelper(AbstractProcessingHelper):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.lvmHelper = LVMProcessingHelper(*args, **kwargs)

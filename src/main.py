@@ -37,7 +37,8 @@ def main():
         'plain': bup_backup.helpers.PlainProcessingHelper(config),
         'lvm': bup_backup.helpers.LVMProcessingHelper(config),
         'crypt': bup_backup.helpers.LVMProcessingHelper(config),
-        'lvm+crypt': bup_backup.helpers.LVMCryptProcessingHelper(config)
+        'lvm+crypt': bup_backup.helpers.LVMCryptProcessingHelper(config),
+        'command': bup_backup.helpers.CommandProcessingHelper(config),
     }
 
     for index in range(0, len(config.table)):
