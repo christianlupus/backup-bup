@@ -1,0 +1,5 @@
+# Source                        Branch      Target path         Type        Options
+/                               local       -                   plain   
+/home                           local       /home-new           plain       none
+/var/lib/                       local       -                   lvm         snap_size=2g
+/var                            local       -                   lvm+crypt   key=/keys/var.key,snap_size=3g
