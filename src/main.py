@@ -67,7 +67,7 @@ def main():
         helper = helperMap[config.table[index].type]
 
         if cli.isVerbose():
-            print(f"Prepare backing up {config.table[index].source}.")
+            print(f"Prepare step for backing up {config.table[index].source}.")
         
         helper.prepareBackup(index)
 
