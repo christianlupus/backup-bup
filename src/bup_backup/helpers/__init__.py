@@ -20,3 +20,4 @@ from .command_processing_helper import CommandProcessingHelper
 from .lvm_processing_helper import LVMProcessingHelper
 from .crypt_processing_helper import CryptProcessingHelper
 from .lvm_crypt_processing_helper import LVMCryptProcessingHelper
+from .lvm_config_checker import LvmConfigChecker

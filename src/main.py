@@ -55,6 +55,9 @@ def main():
             print(f'Checking entry {index} in table: {config.table[index].source}')
         helper.checkConfig(index)
     
+    lvmSizeChecker = bup_backup.helpers.LvmConfigChecker(config)
+    lvmSizeChecker.checkFreeSpace()
+
     if cli.isVerbose():
         print('Finished the checks. Starting backup preparations.')
     

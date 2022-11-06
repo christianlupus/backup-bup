@@ -25,6 +25,9 @@ class ConfigHelper:
     def getOption(self, index: int, param: str, fallback = None):
         return self.config.table[index].options.get(param, self.config.common.get(param, fallback))
 
+    def getGlobalOption(self, param: str, fallback = None):
+        return self.config.common.get(param, fallback)
+
     def getParsedSize(self, str):
         pattern = '([0-9,.]+)([kKmMgGtT]?)'
         expression = re.compile(pattern)

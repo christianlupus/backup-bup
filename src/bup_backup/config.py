@@ -37,6 +37,7 @@ class BackupConfig:
         self.common['snap_name'] = 'snap-backup'
         self.common['decrypt_name'] = 'snap-backup-decrypted'
         self.common['mount_base'] = '/run/bup-backup/mnt'
+        self.common['mount_inplace'] = False
 
         self.table: list[BackupTableRow] = []
 
