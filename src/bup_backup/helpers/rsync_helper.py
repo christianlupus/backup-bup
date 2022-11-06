@@ -76,4 +76,9 @@ class RSyncHelper:
         if debug:
             print('RSync command line:', cmd)
         
-        subprocess.run(cmd).check_returncode()
+        sp = subprocess.run(cmd)
+        if dry:
+            if sp.returncode != 0:
+                print('Warning: rsync failed. This might be a problem.')
+        else:
+            sp.check_returncode()

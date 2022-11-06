@@ -44,20 +44,21 @@ class Workdir:
         return os.path.join(self.getWorkingBasePath(), self.getRelativeWorkingPath(index))
     
     def ensureWorkingPathExists(self, index: int, dry: bool, emptyDir: bool = False):
-        workPath = self.getWorkingPath(index)
+        path = self.getWorkingPath(index)
+        self.ensurePathExists(path, dry, emptyDir)
+        return path
 
-        if emptyDir and os.path.exists(workPath):
+    def ensurePathExists(self, path, dry: bool, emptyDir: bool = False):
+        if emptyDir and os.path.exists(path):
             if dry:
-                print(f"Removing {workPath} for later recreation.")
+                print(f"Removing {path} for later recreation.")
             else:
-                shutil.rmtree(workPath)
+                shutil.rmtree(path)
         
-        if not os.path.exists(workPath):
+        if not os.path.exists(path):
             if dry:
-                print(f"Creating folder {workPath}.")
+                print(f"Creating folder {path}.")
             else:
-                os.makedirs(workPath)
-        
-        return workPath
+                os.makedirs(path)
     
     

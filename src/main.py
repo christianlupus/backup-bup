@@ -43,7 +43,7 @@ def main():
     helperMap = {
         'plain': bup_backup.helpers.PlainProcessingHelper(config, dryRun=cli.isDryRun(), verbose=cli.isVerbose(), debug=cli.isShowDebug()),
         'command': bup_backup.helpers.CommandProcessingHelper(config, dryRun=cli.isDryRun(), verbose=cli.isVerbose(), debug=cli.isShowDebug()),
-        # 'lvm': bup_backup.helpers.LVMProcessingHelper(config, dryRun=cli.isDryRun(), verbose=cli.isVerbose(), debug=cli.isShowDebug()),
+        'lvm': bup_backup.helpers.LVMProcessingHelper(config, dryRun=cli.isDryRun(), verbose=cli.isVerbose(), debug=cli.isShowDebug()),
         # 'crypt': bup_backup.helpers.LVMProcessingHelper(config, dryRun=cli.isDryRun(), verbose=cli.isVerbose(), debug=cli.isShowDebug()),
         # 'lvm+crypt': bup_backup.helpers.LVMCryptProcessingHelper(config, dryRun=cli.isDryRun(), verbose=cli.isVerbose(), debug=cli.isShowDebug()),
     }

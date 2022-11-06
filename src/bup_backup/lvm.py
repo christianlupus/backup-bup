@@ -63,3 +63,49 @@ class Lv:
     def getVgName(self, name):
         return self.__getLvDisplay(name)[1]
 
+    def getFullSnapshotName(self, original, snapName):
+        vgName = self.getVgName(original)
+        return f'/dev/{vgName}/{snapName}'
+
+    def createSnapshot(self, name, snapName, size, dry, verbose, debug):
+        if verbose:
+            print(f'Creating snapshort {snapName} for LV {name} with size {size}.')
+        
+        cmd = [
+            'lvcreate', '--snapshot',
+            '--name', snapName,
+            '--size', size,
+            name
+        ]
+        if not verbose:
+            cmd.append('-q')
+        
+        if debug:
+            print('Snapshot command', cmd)
+
+        if dry:
+            print(f'Creation of snapshot {snapName}.')
+        else:
+            subprocess.run(cmd).check_returncode()
+        
+        return self.getFullSnapshotName(name, snapName)
+    
+    def removeSnapshot(self, snapName, dry, verbose, debug):
+        if verbose:
+            print(f'Removing snapshort {snapName}.')
+        
+        cmd = [
+            'lvremove',
+            '--force',
+            snapName
+        ]
+        if not verbose:
+            cmd.append('-q')
+        
+        if debug:
+            print('Snapshot command', cmd)
+
+        if dry:
+            print(f'Removal of snapshot {snapName}.')
+        else:
+            subprocess.run(cmd).check_returncode()

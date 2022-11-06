@@ -20,6 +20,11 @@ from .abstract_processing_helper import (
 )
 
 import bup_backup
+from .workdir import Workdir
+from .mount_helper import MountHelper
+from .rsync_helper import RSyncHelper
+
+import hashlib
 
 class LVMProcessingHelper(AbstractProcessingHelper):
     def __init__(self, *args, **kwargs):
@@ -43,3 +48,71 @@ class LVMProcessingHelper(AbstractProcessingHelper):
         # print(self.vg.getFreeSizePE(vgName))
         if snapSize > self.vg.getFreeSize(vgName):
             raise ConfigurationException(f"Not enough free space in VG {vgName} to create snapshot for {tableLine.source}.")
+
+    def __getSnapName(self, index):
+        snapNameBase = self.configHelper.getOption(index, 'snap_name')
+        dest = self.config.table[index].target
+        runInplace = self.configHelper.getOption(index, 'mount_inplace', False)
+
+        if runInplace:
+            snapName = f'{snapNameBase}---{hashlib.md5(dest.encode()).hexdigest()}'
+        else:
+            snapName = f'{snapNameBase}---tmp'
+        
+        return snapName
+
+    def prepareBackup(self, index):
+        name = self.config.table[index].source
+        size = self.configHelper.getOption(index, 'snap_size')
+        runInplace = self.configHelper.getOption(index, 'mount_inplace', False)
+
+        workdir = Workdir(self.config)
+        workpath = workdir.ensureWorkingPathExists(index, self.dryRun)
+
+        snapName = self.__getSnapName(index)
+        fullSnapName = self.lv.createSnapshot(name, snapName, size, self.dryRun, self.verbose, self.debug)
+
+        mountHelper = MountHelper(self.config)
+
+        if runInplace:
+            # We need to mount the snapshot to the workdir.
+            if self.verbose:
+                print(f'Mounting snapshot to workpath {workpath}.')
+            
+            mountHelper.mount(fullSnapName, workpath, self.dryRun, self.verbose, self.debug)
+        else:
+            mountPath = mountHelper.getMountPoint(index)
+            workdir.ensurePathExists(mountPath, self.dryRun)
+
+            if self.verbose:
+                print(f'Mounting snapshot to temporary mount point {mountPath}.')
+            mountHelper.mount(fullSnapName, mountPath, self.dryRun, self.verbose, self.debug)
+
+            if self.verbose:
+                print(f'Cloning files from {mountPath} to {workpath}.')
+            rsync = RSyncHelper(self.config)
+            rsync.execute(index, mountPath, workpath, self.verbose, self.dryRun, self.debug)
+
+            if self.verbose:
+                print('Unmounting from temporary mount point')
+            mountHelper.umount(mountPath, self.dryRun, self.verbose, self.debug)
+
+            if self.verbose:
+                print('Removing temporary snapshot')
+            self.lv.removeSnapshot(fullSnapName, dry=self.dryRun, verbose=self.verbose, debug=self.debug)
+    
+    def cleanUpBackup(self, index):
+        if self.configHelper.getOption(index, 'mount_inplace', False):
+            workdir = Workdir(self.config)
+            workpath = workdir.ensureWorkingPathExists(index, self.dryRun)
+            mountHelper = MountHelper(self.config)
+
+            if self.verbose:
+                print(f'Unmounting snapshot from workpath {workpath}.')
+            mountHelper.umount(workpath, self.dryRun, self.verbose, self.debug)
+
+            snapName = self.__getSnapName(index)
+            fullSnapName = self.lv.getFullSnapshotName(self.config.table[index].source, snapName)
+            if self.verbose:
+                print(f'Removing snapshot {snapName}')
+            self.lv.removeSnapshot(fullSnapName, dry=self.dryRun, verbose=self.verbose, debug=self.debug)

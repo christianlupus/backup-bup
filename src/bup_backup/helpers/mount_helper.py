@@ -16,17 +16,51 @@
 """
 
 import bup_backup
+from .config_helper import ConfigHelper
 
 import os
-import re
+import subprocess
+import hashlib
 
 class MountHelper:
     
     def __init__(self, config: bup_backup.config.BackupConfig):
         self.config = config
+        self.configHelper = ConfigHelper(self.config)
 
     def getMountPoint(self, index):
         tableLine = self.config.table[index]
-        base = self.getOption(index, 'mount_base')
-        basedPath = os.path.join(base, tableLine.source)
-        return self.getOption(index, 'mount_path', basedPath)
+        base = self.configHelper.getOption(index, 'mount_base')
+        basedPath = os.path.join(base, hashlib.md5(tableLine.source.encode()).hexdigest())
+        return self.configHelper.getOption(index, 'mount_path', basedPath)
+    
+    def mount(self, device, location, dry, verbose, debug, options = 'ro'):
+        if verbose:
+            print(f'Mounting {device} at {location} (options {options}).')
+        
+        cmd = ['mount', device, location]
+        if options is not None:
+            cmd.append('-o')
+            cmd.append(options)
+        
+        if debug:
+            print('Mount command', cmd)
+        
+        if dry:
+            print(f"Mounting {device}")
+        else:
+            subprocess.run(cmd).check_returncode()
+    
+    def umount(self, location, dry, verbose, debug):
+        if verbose:
+            print(f'Unmounting {location}.')
+        
+        cmd = ['umount', location]
+        
+        if debug:
+            print('Umount command', cmd)
+        
+        if dry:
+            print(f"Carry out umount {location}")
+        else:
+            subprocess.run(cmd).check_returncode()
