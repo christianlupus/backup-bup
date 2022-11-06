@@ -55,6 +55,12 @@ class LVMSnapshotMiddleware(Middleware):
         else:
             return self.__getSnapNameTemporarySnapshot(index, snapNameBase)
         
+    def getFullSnapshotName(self, index):
+        inPlace = self.configHelper.getOption(index, 'mount_inplace', False)
+        lv = bup_backup.lvm.Lv()
+        vgName = lv.getVgName(self.config.table[index].source)
+        return f'/dev/{vgName}/{self.__getSnapName(index, inPlace)}'
+
     def prepare(self, index):
         return None
 

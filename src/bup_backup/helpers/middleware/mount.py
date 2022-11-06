@@ -21,17 +21,21 @@ from ..mount_helper import MountHelper
 
 from .middleware import Middleware
 
+import os
+
 class MountMiddleware(Middleware):
     def __init__(
         self,
         workdir: Workdir,
         mountHelper: MountHelper,
         emptyDir: bool,
+        createDir: bool,
         dry, verbose, debug
     ):
         self.workdir = workdir
         self.mountHelper = mountHelper
         self.emptyDir = emptyDir
+        self.createDir = createDir
 
         self.dry = dry
         self.verbose = verbose
@@ -47,6 +51,9 @@ class MountMiddleware(Middleware):
         else:
             mountPath = self.mountHelper.getMountPoint(index)
         
+        if self.createDir:
+            os.makedirs(mountPath, exist_ok=True)
+
         if self.verbose:
             print('Mounting using mount middleware')
         self.mountHelper.mount(source, mountPath, dry=self.dry, verbose=self.verbose, debug=self.debug)

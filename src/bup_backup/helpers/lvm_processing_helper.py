@@ -34,7 +34,7 @@ class LVMProcessingHelper(AbstractProcessingHelper):
 
         workdir = Workdir(self.config)
         mountHelper = MountHelper(self.config)
-        lvmSnapshotMiddleware = LVMSnapshotMiddleware(
+        self.lvmSnapshotMiddleware = LVMSnapshotMiddleware(
             config=self.config,
             configHelper=self.configHelper,
             dry=self.dryRun,
@@ -45,12 +45,13 @@ class LVMProcessingHelper(AbstractProcessingHelper):
             workdir=workdir,
             mountHelper=mountHelper,
             emptyDir=False,
+            createDir=False,
             dry=self.dryRun,
             verbose=self.verbose,
             debug=self.debug
         )
         self.runner = MiddlewareRunner(
-            middlewareList=[lvmSnapshotMiddleware, mountMiddleware],
+            middlewareList=[self.lvmSnapshotMiddleware, mountMiddleware],
             config=self.config,
             configHelper=self.configHelper,
             workdir=workdir,
@@ -60,9 +61,9 @@ class LVMProcessingHelper(AbstractProcessingHelper):
     def checkConfig(self, index: int):
         super().checkConfig(index)
         tableLine = self.config.table[index]
-
         vgName = self.lv.getVgName(tableLine.source)
-        snapName = f"/dev/{vgName}/{self.configHelper.getOption(index, 'snap_name')}"
+
+        snapName = self.lvmSnapshotMiddleware.getFullSnapshotName(index)
         if self.vg.hasLv(snapName):
             raise ConfigurationException(f"Cannot create {snapName} as it exists already.")
         
