@@ -39,8 +39,8 @@ class LVMSnapshotMiddleware(Middleware):
         self.lv = bup_backup.lvm.Lv()
 
     def __getSnapNameInPlace(self, index, snapNameBase):
-        dest = self.config.table[index].target
-        snapName = f'{snapNameBase}---{hashlib.md5(dest.encode()).hexdigest()}'
+        dynPart = f'{self.config.table[index].branch}:{self.config.table[index].target}'
+        snapName = f'{snapNameBase}---{hashlib.md5(dynPart.encode()).hexdigest()}'
         return snapName
     
     def __getSnapNameTemporarySnapshot(self, index, snapNameBase):
