@@ -20,17 +20,54 @@ from .abstract_processing_helper import (
 )
 
 import os
+import stat
 import re
+import subprocess
 
 class CommandProcessingHelper(AbstractProcessingHelper):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
     def checkConfig(self, index: int):
-        super().checkConfig(index)
+        super().checkConfig(index, sourceMustExist=False)
         tableLine = self.config.table[index]
 
-        if not os.path.isfile(tableLine.source):
-            raise ConfigurationException(f"The path {tableLine.source} is no file to be executable.")
-        if not os.access(tableLine.source, os.X_OK):
-            raise ConfigurationException(f"The file {tableLine.source} cannot be executed.")
+        cmd = self.__splitSource(tableLine.source)
+
+        if len(cmd) == 0:
+            raise ConfigurationException(f"The command '{tableLine.source}' is not valid.")
+        if not os.path.isfile(cmd[0]):
+            raise ConfigurationException(f"The path {cmd[0]} is no file to be executable.")
+        if not os.access(cmd[0], os.X_OK):
+            raise ConfigurationException(f"The file {cmd[0]} cannot be executed.")
+
+    def __splitSource(self, source):
+        regex = re.compile('\\\\ ')
+        cmd = regex.split(source)
+        return cmd
+
+    def prepareBackup(self, index):
+        if self.verbose:
+            print(f"Extracting the command output from {self.config.table[index].source}.")
+
+        cmd = self.__splitSource(self.config.table[index].source)
+        
+        if self.debug:
+            print('Cmd', cmd)
+        
+        workdir = self.workdirHelper.ensureWorkingPathExists(index, self.dryRun, emptyDir=True)
+
+        if self.dryRun:
+            print('Executed command', self.config.table[index].source)
+        else:
+            # Make sure the folder is not readable by anyone except root
+            os.chmod(workdir, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
+            
+            subprocess.run(
+                cmd,
+                cwd=workdir,
+            ).check_returncode()
+
+    def cleanUpBackup(self, index):
+        # There is nothing to be done here.
+        pass

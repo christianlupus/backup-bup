@@ -18,12 +18,14 @@
 from .abstract_processing_helper import (
     AbstractProcessingHelper, ConfigurationException
 )
+from .rsync_helper import RSyncHelper
 
 import os
 
 class PlainProcessingHelper(AbstractProcessingHelper):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.rsync = RSyncHelper(self.config)
     
     def checkConfig(self, index: int):
         super().checkConfig(index)
@@ -31,3 +33,21 @@ class PlainProcessingHelper(AbstractProcessingHelper):
 
         if not os.path.isdir(tableLine.source):
             raise ConfigurationException(f"Path {tableLine.source} is no folder.")
+        
+        self.rsync.check()
+    
+    def prepareBackup(self, index):
+        workDir = self.workdirHelper.ensureWorkingPathExists(index, self.dryRun)
+
+        if self.verbose:
+            print('Cloning files from plain folder')
+        
+        self.rsync.execute(
+            index, 
+            self.config.table[index].source, 
+            workDir, 
+            verbose=self.verbose, dry=self.dryRun, debug=self.debug)
+
+    def cleanUpBackup(self, index):
+        # We do not need to clean anything up here.
+        pass

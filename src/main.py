@@ -35,12 +35,17 @@ def main():
     if cli.isShowDebug():
         print('Total configuration', config.__dict__)
     
+    bup = bup_backup.bup.Bup(config, verbose=cli.isVerbose(), dry=cli.isDryRun(), debug=cli.isShowDebug())
+    workDir = bup_backup.helpers.workdir.Workdir(config)
+
+    bup.check()
+
     helperMap = {
-        'plain': bup_backup.helpers.PlainProcessingHelper(config),
-        'lvm': bup_backup.helpers.LVMProcessingHelper(config),
-        'crypt': bup_backup.helpers.LVMProcessingHelper(config),
-        'lvm+crypt': bup_backup.helpers.LVMCryptProcessingHelper(config),
-        'command': bup_backup.helpers.CommandProcessingHelper(config),
+        'plain': bup_backup.helpers.PlainProcessingHelper(config, dryRun=cli.isDryRun(), verbose=cli.isVerbose(), debug=cli.isShowDebug()),
+        'command': bup_backup.helpers.CommandProcessingHelper(config, dryRun=cli.isDryRun(), verbose=cli.isVerbose(), debug=cli.isShowDebug()),
+        # 'lvm': bup_backup.helpers.LVMProcessingHelper(config, dryRun=cli.isDryRun(), verbose=cli.isVerbose(), debug=cli.isShowDebug()),
+        # 'crypt': bup_backup.helpers.LVMProcessingHelper(config, dryRun=cli.isDryRun(), verbose=cli.isVerbose(), debug=cli.isShowDebug()),
+        # 'lvm+crypt': bup_backup.helpers.LVMCryptProcessingHelper(config, dryRun=cli.isDryRun(), verbose=cli.isVerbose(), debug=cli.isShowDebug()),
     }
 
     for index in range(0, len(config.table)):
@@ -51,7 +56,7 @@ def main():
         helper.checkConfig(index)
     
     if cli.isVerbose():
-        print('Finished the checks. Starting backup process.')
+        print('Finished the checks. Starting backup preparations.')
     
     tic = time.monotonic()
 
@@ -59,13 +64,38 @@ def main():
         helper = helperMap[config.table[index].type]
 
         if cli.isVerbose():
-            print(f"Backing up {config.table[index].source} started.")
+            print(f"Prepare backing up {config.table[index].source}.")
         
-        helper.execute(index)
+        helper.prepareBackup(index)
 
         if cli.isVerbose():
-            print(f"Backup step completed.")
+            print(f"Backup preparation step for {config.table[index].source} completed.")
     
+    if cli.isVerbose():
+        print('Starting bup backup process.')
+    
+    workPath = workDir.getWorkingBasePath()
+    bup.index(workPath)
+    bup.save(workPath)
+
+    if cli.isVerbose():
+        print('Finished bup backup process. Cleaning up backup work now.')
+
+    for index in range(0, len(config.table)):
+        helper = helperMap[config.table[index].type]
+
+        if cli.isVerbose():
+            print(f"Clean up after backing up {config.table[index].source}.")
+        
+        helper.cleanUpBackup(index)
+
+        if cli.isVerbose():
+            print(f"Cleanup step for {config.table[index].source} completed.")
+    
+    if cli.isVerbose():
+        print('Finished clean up.')
+
+
     toc = time.monotonic()
 
     if cli.isVerbose():

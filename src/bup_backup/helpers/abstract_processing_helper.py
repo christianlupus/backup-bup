@@ -18,8 +18,11 @@
 # from .config import BackupConfig
 import bup_backup
 from .config_helper import ConfigHelper
+from .workdir import Workdir
 
 import os
+import shutil
+import hashlib
 
 class ConfigurationException(Exception):
     pass
@@ -33,23 +36,29 @@ class AbstractProcessingHelper:
         self.debug = debug
 
         self.configHelper = ConfigHelper(config)
+        self.workdirHelper = Workdir(config)
 
     def __isCommonConfigurationValid(self, index: int):
         # Is the current user root?
         if os.environ.get('USER') != 'root':
             raise ConfigurationException('You must be root in order to allow system commands to execute')
     
-    def checkConfig(self, index):
+    def checkConfig(self, index, sourceMustExist: bool = True):
         self.__isCommonConfigurationValid(index)
 
-        if not os.path.exists(self.config.table[index].source):
+        if sourceMustExist and not os.path.exists(self.config.table[index].source):
             raise ConfigurationException(f"The source {self.config.table[index].source} does not exist.")
         
-    def prepare(self, index):
-        pass
+        workFolder = self.workdirHelper.getWorkingBasePath()
+        if not os.path.exists(workFolder):
+            raise ConfigurationException(f"The configured work folder {workFolder} does not exist.")
+        if not os.path.isdir(workFolder):
+            raise ConfigurationException(f"The configured work folder {workFolder} is no folder.")
+        if not os.access(workFolder, os.R_OK + os.W_OK + os.X_OK):
+            raise ConfigurationException(f"The configured work folder {workFolder} is not usable as the permissions are not appropriate.")
     
-    def execute(self, index):
+    def prepareBackup(self, index):
         raise Exception('Not yet implemented.')
-
-    def finish(self, index):
-        pass
+    
+    def cleanUpBackup(self, index):
+        raise Exception('Not yet implemented.')
