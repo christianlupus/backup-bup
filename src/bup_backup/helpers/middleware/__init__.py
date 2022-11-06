@@ -17,5 +17,6 @@
 
 from .mount import MountMiddleware
 from .lvm import LVMSnapshotMiddleware
+from .crypt import LuksCryptsetupMiddleware
 
 from .runner import MiddlewareRunner
