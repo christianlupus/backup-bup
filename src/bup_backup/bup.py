@@ -136,3 +136,27 @@ class Bup:
             ret[srcName] = destName
         
         return ret
+    
+    def finishBackup(self):
+        if self.verbose:
+            print('Finishing bup backup process.')
+        
+        cmd = [
+            self.bupCmd, '-d', self.bupFolder,
+            'fsck', '-g', '-q'
+        ]
+        if self.debug:
+            print('Terminal command', cmd)
+        if self.dry:
+            print('Generating backup parity blocks')
+        else:
+            sp = subprocess.run(
+                cmd,
+                stderr=subprocess.STDOUT,
+                stdout=subprocess.PIPE,
+                text=True
+            )
+
+            if sp.returncode != 0:
+                print(sp.stdout)
+                raise Exception('Error during bup fsck run. Please revisit your archive.')
