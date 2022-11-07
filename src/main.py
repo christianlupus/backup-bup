@@ -95,6 +95,8 @@ def main():
         if cli.isVerbose():
             print(f"Cleanup step for {config.table[index].source} completed.")
     
+    bup.finishBackup()
+    
     if cli.isVerbose():
         print('Finished clean up.')
 
