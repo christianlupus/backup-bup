@@ -56,7 +56,7 @@ class RSyncHelper:
             
             self.checked = True
     
-    def execute(self, index: int, source: str, dest: str, verbose: bool, dry: bool, debug: bool = False):
+    def execute(self, index: int, source: str, dest: str, verbose: bool, dry: bool, debug: bool, protectedDirs: list[str] = []):
         src = source
         if not src.endswith('/'):
             src = f"{src}/"
@@ -67,6 +67,9 @@ class RSyncHelper:
         ] + self.__getLongOptions(index) + [
             src, dest
         ]
+
+        for pd in protectedDirs:
+            cmd = cmd + [f"-fP {pd}", f"-fH {pd}"]
 
         if verbose:
             cmd.append('-v')
