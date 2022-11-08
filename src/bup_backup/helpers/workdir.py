@@ -37,8 +37,12 @@ class Workdir:
         return workFolder
     
     def getRelativeWorkingPath(self, index: int):
-        relPath = f'{self.config.table[index].branch}:{self.config.table[index].target}'
-        return hashlib.md5(relPath.encode()).hexdigest()
+        target = self.config.table[index].target
+        while target[0] == '/':
+            target = target[1:]
+        relPath = os.path.join(self.config.table[index].branch, target)
+        return relPath
+        # return hashlib.md5(relPath.encode()).hexdigest()
 
     def getWorkingPath(self, index: int):
         return os.path.join(self.getWorkingBasePath(), self.getRelativeWorkingPath(index))

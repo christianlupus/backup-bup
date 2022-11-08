@@ -21,6 +21,8 @@ from ..workdir import Workdir
 from ..rsync_helper import RSyncHelper
 from .middleware import Middleware
 
+import re
+
 class MiddlewareRunner:
     def __init__(
         self,
@@ -85,22 +87,32 @@ class MiddlewareRunner:
             if self.verbose:
                 print('Copying data from temporary location to final workdir')
 
+            currentTarget = tableLine.target
+            while currentTarget.endswith('/'):
+                currentTarget = currentTarget[0:-1]
+            regex = re.compile(f'{currentTarget}(/.+)')
+
+            protectedPaths = []
+            for line in self.config.table:
+                if line.branch != tableLine.branch:
+                    continue
+                match = regex.match(line.target)
+                if match is not None:
+                    protectedPaths.append(match.group(1))
+                
+
             self.rsync.execute(
                 index=index,
                 source=lastStoredLocation,
                 dest=dest,
-                verbose=self.verbose, dry=self.dry, debug=self.debug
+                verbose=self.verbose, dry=self.dry, debug=self.debug,
+                protectedDirs=protectedPaths
             )
 
             if self.verbose:
                 print('Data is synchronized. Closing temporary steps.')
             
             # We need to run the closing steps of the middlewares in revered order
-            # for i in reversed(indexRange):
-            #     middleware = self.middlewareList[i]
-
-            #     (dest, state) = self.states[index][i]
-            #     middleware.afterStep(dest=dest, state=state)
             self.__cleanUpMiddlewares(index)
 
     def __cleanUpMiddlewares(self, index):

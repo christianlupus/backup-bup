@@ -58,7 +58,8 @@ class Bup:
         cmd = [
             self.bupCmd,
             '-d', self.bupFolder,
-            'index', base
+            'index', base,
+            '--no-check-device'
         ]
 
         if self.debug:
@@ -92,23 +93,18 @@ class Bup:
         cmdStub = [
             self.bupCmd,
             '-d', self.bupFolder,
-            'save', '-q',
+            'save',
         ]
+
+        if not self.verbose:
+            cmdStub.append('-q')
 
         for branch in self.__getAllBranches():
             if self.verbose:
                 print(f"Preparing for saving branch \"{branch}\".")
             
-            cmd = cmdStub + ['-n', branch]
-            dirs = []
+            cmd = cmdStub + ['-n', branch, '--strip', os.path.join(base, branch)]
 
-            graftArray = self.__getGrafts(branch)
-            for key in graftArray.keys():
-                cmd.append('--graft')
-                cmd.append(f"{key}={graftArray[key]}")
-                dirs.append(key)
-            
-            cmd = cmd + dirs
             if self.debug:
                 print('Bup save command line:', cmd)
             
@@ -143,7 +139,7 @@ class Bup:
         
         cmd = [
             self.bupCmd, '-d', self.bupFolder,
-            'fsck', '-g', '-q'
+            'fsck', '-g'
         ]
         if self.debug:
             print('Terminal command', cmd)

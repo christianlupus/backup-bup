@@ -42,17 +42,21 @@ class MountMiddleware(Middleware):
         self.debug = debug
 
     def prepare(self, index):
-        self.workpath = self.workdir.ensureWorkingPathExists(index, self.dry, emptyDir=self.emptyDir)
         return None
 
     def beforeStep(self, index, source, inPlace, state):
+        workpath = self.workdir.ensureWorkingPathExists(index, dry=self.dry, emptyDir=self.emptyDir)
+
         if inPlace:
-            mountPath = self.workpath
+            mountPath = workpath
         else:
             mountPath = self.mountHelper.getMountPoint(index)
         
         if self.createDir:
-            os.makedirs(mountPath, exist_ok=True)
+            if self.dry:
+                print(f'Ensuring that mount path {mountPath} exists.')
+            else:
+                os.makedirs(mountPath, exist_ok=True)
 
         if self.verbose:
             print('Mounting using mount middleware')
