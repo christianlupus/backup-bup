@@ -128,3 +128,32 @@ class BackupConfigParser:
             
             config.table.append(lineOptions)
             
+class BackupConfigSorter:
+    def __init__(self):
+        pass
+
+    def sort(self, config: BackupConfig):
+        decoratedTable = [(row.branch,row.target,i,row) for i,row in enumerate(config.table)]
+        decoratedTable.sort()
+        config.table = [row for branch,target,i,row in decoratedTable]
+        
+        self.__checkDuplicateTargets(decoratedTable)
+
+        return config
+    
+    def __checkDuplicateTargets(self, decoratedTable):
+        targets = [(branch,target) for branch,target,i,row in decoratedTable]
+        seen = set()
+        dupes = []
+
+        for entry in targets:
+            if entry in seen:
+                dupes.append(entry)
+            else:
+                seen.add(entry)
+        
+        print(targets)
+        print(seen)
+        print(dupes)
+        if len(dupes) > 0:
+            raise Exception('Multiple entries with same target were specified')

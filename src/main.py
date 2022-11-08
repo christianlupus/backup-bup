@@ -31,6 +31,9 @@ def main():
     config = bup_backup.config.BackupConfig()
     parser.parseCommonConfig(cli.getCommonConfigName(), config)
     parser.parseConfigTable(cli.getTableName(), config)
+
+    sorter = bup_backup.config.BackupConfigSorter()
+    config = sorter.sort(config)
     
     if cli.isShowDebug():
         print('Total configuration', config.__dict__)
