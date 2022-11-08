@@ -23,6 +23,7 @@ from .workdir import Workdir
 import os
 import shutil
 import hashlib
+import re
 
 class ConfigurationException(Exception):
     pass
@@ -42,6 +43,12 @@ class AbstractProcessingHelper:
         # Is the current user root?
         if os.environ.get('USER') != 'root':
             raise ConfigurationException('You must be root in order to allow system commands to execute')
+        
+        pattern = '/'
+        regex = re.compile(pattern)
+        search = regex.search(self.config.table[index].branch)
+        if search is not None:
+            raise ConfigurationException(f'The branch name "{self.config.table[index].branch}" must not contain a slash')
     
     def checkConfig(self, index, sourceMustExist: bool = True):
         self.__isCommonConfigurationValid(index)
