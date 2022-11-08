@@ -152,8 +152,5 @@ class BackupConfigSorter:
             else:
                 seen.add(entry)
         
-        print(targets)
-        print(seen)
-        print(dupes)
         if len(dupes) > 0:
             raise Exception('Multiple entries with same target were specified')
