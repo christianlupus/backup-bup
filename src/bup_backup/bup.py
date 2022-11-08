@@ -139,7 +139,7 @@ class Bup:
         
         cmd = [
             self.bupCmd, '-d', self.bupFolder,
-            'fsck', '-g', '-q'
+            'fsck', '-g'
         ]
         if self.debug:
             print('Terminal command', cmd)
