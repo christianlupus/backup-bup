@@ -93,8 +93,11 @@ class Bup:
         cmdStub = [
             self.bupCmd,
             '-d', self.bupFolder,
-            'save', '-q',
+            'save',
         ]
+
+        if not self.verbose:
+            cmdStub.append('-q')
 
         for branch in self.__getAllBranches():
             if self.verbose:
