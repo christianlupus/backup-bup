@@ -21,6 +21,7 @@ from .abstract_processing_helper import (
 from .rsync_helper import RSyncHelper
 
 import os
+import re
 
 class PlainProcessingHelper(AbstractProcessingHelper):
     def __init__(self, *args, **kwargs):
@@ -39,6 +40,19 @@ class PlainProcessingHelper(AbstractProcessingHelper):
     def prepareBackup(self, index):
         workDir = self.workdirHelper.ensureWorkingPathExists(index, self.dryRun)
 
+        currentTarget = self.config.table[index].target
+        while currentTarget.endswith('/'):
+            currentTarget = currentTarget[0:-1]
+        regex = re.compile(f'{currentTarget}(/.+)')
+
+        protectedPaths = []
+        for line in self.config.table:
+            if line.branch != self.config.table[index].branch:
+                continue
+            match = regex.match(line.target)
+            if match is not None:
+                protectedPaths.append(match.group(1))
+        
         if self.verbose:
             print('Cloning files from plain folder')
         
@@ -46,7 +60,9 @@ class PlainProcessingHelper(AbstractProcessingHelper):
             index, 
             self.config.table[index].source, 
             workDir, 
-            verbose=self.verbose, dry=self.dryRun, debug=self.debug)
+            verbose=self.verbose, dry=self.dryRun, debug=self.debug,
+            protectedDirs=protectedPaths
+        )
 
     def cleanUpBackup(self, index):
         # We do not need to clean anything up here.
