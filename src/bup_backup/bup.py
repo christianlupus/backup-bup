@@ -58,7 +58,8 @@ class Bup:
         cmd = [
             self.bupCmd,
             '-d', self.bupFolder,
-            'index', base
+            'index', base,
+            '--no-check-device'
         ]
 
         if self.debug:
