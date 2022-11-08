@@ -103,16 +103,8 @@ class Bup:
             if self.verbose:
                 print(f"Preparing for saving branch \"{branch}\".")
             
-            cmd = cmdStub + ['-n', branch]
-            dirs = []
+            cmd = cmdStub + ['-n', branch, '--strip', os.path.join(base, branch)]
 
-            graftArray = self.__getGrafts(branch)
-            for key in graftArray.keys():
-                cmd.append('--graft')
-                cmd.append(f"{key}={graftArray[key]}")
-                dirs.append(key)
-            
-            cmd = cmd + dirs
             if self.debug:
                 print('Bup save command line:', cmd)
             
